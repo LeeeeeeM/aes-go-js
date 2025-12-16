@@ -7,6 +7,8 @@ function App() {
   const [inputText, setInputText] = useState('')
   const [key, setKey] = useState('')
   const [result, setResult] = useState('')
+  const [encryptedData, setEncryptedData] = useState('')
+  const [backendResponse, setBackendResponse] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -25,13 +27,18 @@ function App() {
       setLoading(true)
       setError('')
       setResult('')
+      setEncryptedData('')
+      setBackendResponse('')
 
       // 1. 前端用密钥加密内容
       const aesInstance = new AESCrypto(key)
       const { cipherB64, ivB64 } = aesInstance.encrypt(inputText)
+      const encryptedDataStr = cipherB64 + '|' + ivB64
+      setEncryptedData(encryptedDataStr)
 
       // 2. 发送加密内容和密钥给后端
       const response = await apiService.process(cipherB64, ivB64, key)
+      setBackendResponse(response.processedData)
 
       // 3. 从返回的数据中解析出cipherB64和ivB64
       const [processedCipherB64, processedIVB64] = response.processedData.split('|')
@@ -63,6 +70,8 @@ function App() {
     setInputText('')
     setKey('')
     setResult('')
+    setEncryptedData('')
+    setBackendResponse('')
     setError('')
   }
 
@@ -75,18 +84,9 @@ function App() {
 
       {error && <div className="error">{error}</div>}
 
-      <div className="section">
-        <h2>输入内容</h2>
-        <textarea
-          value={inputText}
-          onChange={(e) => setInputText(e.target.value)}
-          placeholder="请输入要处理的文本内容..."
-          rows={3}
-        />
-      </div>
-
-      <div className="section">
-        <h2>密钥</h2>
+      {/* 密钥区域 - 最上方 */}
+      <div className="section key-top-section">
+        <h2>🔑 密钥设置</h2>
         <div className="key-section">
           <input
             type="text"
@@ -104,27 +104,83 @@ function App() {
         </small>
       </div>
 
-      <div className="section">
-        <button onClick={handleProcess} disabled={loading} className="process-btn">
-          {loading ? '处理中...' : '发送测试'}
-        </button>
-        <button onClick={handleClear} className="clear-btn">
-          清除
-        </button>
-      </div>
+      {/* 左右分布的主要内容区域 */}
+      <div className="main-content">
+        {/* 左侧 - 输入区域 */}
+        <div className="left-panel">
+          <h2>📝 输入区域</h2>
 
-      {result && (
-        <div className="section">
-          <h2>处理结果</h2>
-          <div className="result">
-            <h3>最终解密结果:</h3>
-            <textarea value={result} readOnly rows={3} />
+          {/* 原始输入内容 */}
+          <div className="section">
+            <h3>原始输入内容</h3>
+            <textarea
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              placeholder="请输入要处理的文本内容..."
+              rows={4}
+              className="input-textarea"
+            />
+          </div>
+
+          {/* 传递给后端的内容 */}
+          {encryptedData && (
+            <div className="section">
+              <h3>🔒 传递给后端的内容 (已加密)</h3>
+              <textarea
+                value={encryptedData}
+                readOnly
+                rows={3}
+                className="encrypted-textarea"
+              />
+            </div>
+          )}
+
+          {/* 操作按钮 */}
+          <div className="button-section">
+            <button onClick={handleProcess} disabled={loading} className="process-btn">
+              {loading ? '处理中...' : '🚀 发送测试'}
+            </button>
+            <button onClick={handleClear} className="clear-btn">
+              🗑️ 清除
+            </button>
           </div>
         </div>
-      )}
 
+        {/* 右侧 - 输出区域 */}
+        <div className="right-panel">
+          <h2>📤 输出区域</h2>
+
+          {/* 后端返回的原始内容 */}
+          {backendResponse && (
+            <div className="section">
+              <h3>📦 后端返回的原始内容 (已加密)</h3>
+              <textarea
+                value={backendResponse}
+                readOnly
+                rows={3}
+                className="backend-response-textarea"
+              />
+            </div>
+          )}
+
+          {/* 最终解密结果 */}
+          {result && (
+            <div className="section">
+              <h3>✅ 最终解密结果</h3>
+              <textarea
+                value={result}
+                readOnly
+                rows={4}
+                className="result-textarea"
+              />
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* 底部信息区域 */}
       <div className="info">
-        <h3>测试流程:</h3>
+        <h3>🔄 测试流程:</h3>
         <ol>
           <li>输入明文内容和密钥</li>
           <li>前端用密钥加密内容</li>

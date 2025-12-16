@@ -216,3 +216,149 @@ button:disabled {
     width: 100%;
   }
 }
+
+/* 新增样式 - 左右分布布局 */
+.key-top-section {
+  background-color: #e8f4fd;
+  border-color: #2196f3;
+}
+
+.key-top-section h2 {
+  color: #1976d2;
+  margin-bottom: 15px;
+}
+
+.main-content {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.left-panel,
+.right-panel {
+  flex: 1;
+  min-width: 0;
+}
+
+.left-panel {
+  border-color: #4caf50;
+}
+
+.left-panel h2 {
+  color: #2e7d32;
+}
+
+.right-panel {
+  border-color: #ff9800;
+}
+
+.right-panel h2 {
+  color: #e65100;
+}
+
+.left-panel .section,
+.right-panel .section {
+  margin-bottom: 20px;
+}
+
+.input-textarea,
+.encrypted-textarea,
+.backend-response-textarea,
+.result-textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 12px;
+  line-height: 1.4;
+  resize: vertical;
+  background-color: #f9f9f9;
+}
+
+.encrypted-textarea {
+  background-color: #fff3e0;
+  border-color: #ff9800;
+}
+
+.backend-response-textarea {
+  background-color: #e8f5e8;
+  border-color: #4caf50;
+}
+
+.result-textarea {
+  background-color: #e3f2fd;
+  border-color: #2196f3;
+  font-weight: bold;
+  color: #1565c0;
+}
+
+.button-section {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.process-btn,
+.clear-btn {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.process-btn {
+  background-color: #4caf50;
+  color: white;
+}
+
+.process-btn:hover:not(:disabled) {
+  background-color: #388e3c;
+}
+
+.process-btn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.clear-btn {
+  background-color: #f44336;
+  color: white;
+}
+
+.clear-btn:hover {
+  background-color: #d32f2f;
+}
+
+.left-panel h3,
+.right-panel h3 {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  font-weight: bold;
+  color: #333;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .main-content {
+    flex-direction: column;
+  }
+
+  .left-panel,
+  .right-panel {
+    width: 100%;
+  }
+
+  .button-section {
+    flex-direction: column;
+  }
+
+  .process-btn,
+  .clear-btn {
+    width: 100%;
+  }
+}
