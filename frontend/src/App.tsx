@@ -129,7 +129,7 @@ function App() {
               <textarea
                 value={encryptedData}
                 readOnly
-                rows={3}
+                rows={4}
                 className="encrypted-textarea"
               />
             </div>
@@ -147,7 +147,7 @@ function App() {
               <textarea
                 value={backendResponse}
                 readOnly
-                rows={3}
+                rows={4}
                 className="backend-response-textarea"
               />
             </div>
