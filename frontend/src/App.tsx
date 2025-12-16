@@ -123,17 +123,16 @@ function App() {
           </div>
 
           {/* 传递给后端的内容 */}
-          {encryptedData && (
-            <div className="section">
-              <h3>🔒 传递给后端的内容 (已加密)</h3>
-              <textarea
-                value={encryptedData}
-                readOnly
-                rows={4}
-                className="encrypted-textarea"
-              />
-            </div>
-          )}
+          <div className="section">
+            <h3>🔒 传递给后端的内容 (已加密)</h3>
+            <textarea
+              value={encryptedData}
+              readOnly
+              rows={4}
+              className="encrypted-textarea"
+              placeholder="加密后的数据将显示在这里..."
+            />
+          </div>
         </div>
 
         {/* 右侧 - 输出区域 */}
@@ -141,30 +140,28 @@ function App() {
           <h2>📤 输出区域</h2>
 
           {/* 后端返回的原始内容 */}
-          {backendResponse && (
-            <div className="section">
-              <h3>📦 后端返回的原始内容 (已加密)</h3>
-              <textarea
-                value={backendResponse}
-                readOnly
-                rows={4}
-                className="backend-response-textarea"
-              />
-            </div>
-          )}
+          <div className="section">
+            <h3>📦 后端返回的原始内容 (已加密)</h3>
+            <textarea
+              value={backendResponse}
+              readOnly
+              rows={4}
+              className="backend-response-textarea"
+              placeholder="后端返回的加密数据将显示在这里..."
+            />
+          </div>
 
           {/* 最终解密结果 */}
-          {result && (
-            <div className="section">
-              <h3>✅ 最终解密结果</h3>
-              <textarea
-                value={result}
-                readOnly
-                rows={4}
-                className="result-textarea"
-              />
-            </div>
-          )}
+          <div className="section">
+            <h3>✅ 最终解密结果</h3>
+            <textarea
+              value={result}
+              readOnly
+              rows={4}
+              className="result-textarea"
+              placeholder="解密后的明文将显示在这里..."
+            />
+          </div>
         </div>
       </div>
 
