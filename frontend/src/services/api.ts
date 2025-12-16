@@ -21,10 +21,8 @@ class ApiService {
     timeout: 10000,
   });
 
-  async process(cipherB64: string, ivB64: string, key: string): Promise<ProcessResponse> {
+  async process(encryptedData: string, key: string): Promise<ProcessResponse> {
     try {
-      // 将cipherB64和ivB64组合成一个字符串，用特殊分隔符分开
-      const encryptedData = cipherB64 + '|' + ivB64;
       const response = await this.axiosInstance.post<ProcessResponse>('/process', {
         encryptedData,
         key,

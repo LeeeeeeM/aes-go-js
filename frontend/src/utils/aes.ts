@@ -113,32 +113,14 @@ export class AESCrypto {
       throw new Error('Decryption failed');
     }
   }
-
-  /**
-   * 打包加密数据为传输格式
-   * @param {string} cipherB64 加密后的密文base64
-   * @param {string} ivB64 IV的base64
-   * @returns {string} 打包后的数据字符串
-   */
-  static packEncryptedData(cipherB64: string, ivB64: string): string {
-    return cipherB64 + '|' + ivB64;
+  packEncryptedData(inputText: string): string {
+    const { cipherB64, ivB64 } = this.encrypt(inputText);
+    return `${cipherB64}|${ivB64}`;
   }
-
-  /**
-   * 解包传输格式的数据
-   * @param {string} packedData 打包的数据字符串
-   * @returns {object} { cipherB64: string, ivB64: string }
-   */
-  static unpackEncryptedData(packedData: string): { cipherB64: string; ivB64: string } {
-    const parts = packedData.split('|');
-    if (parts.length !== 2) {
-      throw new Error('Invalid packed data format');
-    }
-    return {
-      cipherB64: parts[0],
-      ivB64: parts[1]
-    };
+  unpackEncryptedData(encryptedData: string): string {
+    const [cipherB64, ivB64] = encryptedData.split('|');
+    const result = this.decrypt(cipherB64, ivB64);
+    return result;
   }
-
 }
 

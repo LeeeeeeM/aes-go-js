@@ -31,19 +31,15 @@ function App() {
 
       // 1. 前端用密钥加密内容
       const aesInstance = new AESCrypto(key)
-      const { cipherB64, ivB64 } = aesInstance.encrypt(inputText)
-      const encryptedDataStr = AESCrypto.packEncryptedData(cipherB64, ivB64)
+      const encryptedDataStr = aesInstance.packEncryptedData(inputText)
       setEncryptedData(encryptedDataStr)
 
       // 2. 发送加密内容和密钥给后端
-      const response = await apiService.process(cipherB64, ivB64, key)
+      const response = await apiService.process(encryptedDataStr, key)
       setBackendResponse(response.processedData)
 
-      // 3. 从返回的数据中解析出cipherB64和ivB64
-      const { cipherB64: processedCipherB64, ivB64: processedIVB64 } = AESCrypto.unpackEncryptedData(response.processedData)
-
       // 4. 前端用密钥解密后端返回的内容
-      const decryptedResult = aesInstance.decrypt(processedCipherB64, processedIVB64)
+      const decryptedResult = aesInstance.unpackEncryptedData(response.processedData)
 
       setResult(decryptedResult)
     } catch (err) {
