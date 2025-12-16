@@ -134,16 +134,6 @@ function App() {
               />
             </div>
           )}
-
-          {/* 操作按钮 */}
-          <div className="button-section">
-            <button onClick={handleProcess} disabled={loading} className="process-btn">
-              {loading ? '处理中...' : '🚀 发送测试'}
-            </button>
-            <button onClick={handleClear} className="clear-btn">
-              🗑️ 清除
-            </button>
-          </div>
         </div>
 
         {/* 右侧 - 输出区域 */}
@@ -176,6 +166,16 @@ function App() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* 操作按钮区域 */}
+      <div className="global-button-section">
+        <button onClick={handleProcess} disabled={loading} className="process-btn">
+          {loading ? '处理中...' : '🚀 发送测试'}
+        </button>
+        <button onClick={handleClear} className="clear-btn">
+          🗑️ 清除
+        </button>
       </div>
 
       {/* 底部信息区域 */}
