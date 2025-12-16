@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import toast, { Toaster } from 'react-hot-toast'
 import { AESCrypto } from './utils/aes'
 import { apiService } from './services/api'
 import './App.css'
@@ -10,22 +11,20 @@ function App() {
   const [encryptedData, setEncryptedData] = useState('')
   const [backendResponse, setBackendResponse] = useState('')
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
 
   // 处理完整的加密解密流程
   const handleProcess = async () => {
     try {
       if (!inputText.trim()) {
-        setError('请输入要处理的文本')
+        toast.error('请输入要处理的文本')
         return
       }
       if (!key.trim()) {
-        setError('请输入密钥')
+        toast.error('请输入密钥')
         return
       }
 
       setLoading(true)
-      setError('')
       setResult('')
       setEncryptedData('')
       setBackendResponse('')
@@ -48,7 +47,8 @@ function App() {
 
       setResult(decryptedResult)
     } catch (err) {
-      setError(err instanceof Error ? err.message : '处理失败')
+      const errorMessage = err instanceof Error ? err.message : '处理失败'
+      toast.error(errorMessage)
       console.error(err)
     } finally {
       setLoading(false)
@@ -72,17 +72,24 @@ function App() {
     setResult('')
     setEncryptedData('')
     setBackendResponse('')
-    setError('')
   }
 
   return (
     <div className="app">
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: '#ff4757',
+            color: '#fff',
+          },
+        }}
+      />
       <h1>AES 加解密接口测试</h1>
       <p className="description">
         测试完整的AES加密解密流程：前端加密 → 后端处理 → 前端解密
       </p>
-
-      {error && <div className="error">{error}</div>}
 
       {/* 密钥区域 - 最上方 */}
       <div className="section key-top-section">
