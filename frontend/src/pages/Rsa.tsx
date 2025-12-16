@@ -94,9 +94,18 @@ function Rsa() {
         position="top-right"
         toastOptions={{
           duration: 4000,
-          style: {
-            background: '#ff4757',
-            color: '#fff',
+          success: {
+            style: {
+              background: '#fff',
+              color: '#28a745',
+              border: '1px solid #28a745',
+            },
+          },
+          error: {
+            style: {
+              background: '#ff4757',
+              color: '#fff',
+            },
           },
         }}
       />
