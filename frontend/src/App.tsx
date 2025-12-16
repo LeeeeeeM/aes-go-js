@@ -32,7 +32,7 @@ function App() {
       // 1. 前端用密钥加密内容
       const aesInstance = new AESCrypto(key)
       const { cipherB64, ivB64 } = aesInstance.encrypt(inputText)
-      const encryptedDataStr = cipherB64 + '|' + ivB64
+      const encryptedDataStr = AESCrypto.packEncryptedData(cipherB64, ivB64)
       setEncryptedData(encryptedDataStr)
 
       // 2. 发送加密内容和密钥给后端
@@ -40,7 +40,7 @@ function App() {
       setBackendResponse(response.processedData)
 
       // 3. 从返回的数据中解析出cipherB64和ivB64
-      const [processedCipherB64, processedIVB64] = response.processedData.split('|')
+      const { cipherB64: processedCipherB64, ivB64: processedIVB64 } = AESCrypto.unpackEncryptedData(response.processedData)
 
       // 4. 前端用密钥解密后端返回的内容
       const decryptedResult = aesInstance.decrypt(processedCipherB64, processedIVB64)
