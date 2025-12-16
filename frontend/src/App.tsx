@@ -133,7 +133,7 @@ function App() {
           <li>前端用密钥解密后端返回的内容</li>
           <li>验证整个流程的正确性</li>
         </ol>
-        <p><strong>注意：</strong>确保后端服务在 http://localhost:8080 运行</p>
+        <p><strong>注意：</strong>确保后端服务在 http://localhost:9091 运行</p>
       </div>
     </div>
   )

@@ -116,5 +116,3 @@ export class AESCrypto {
 
 }
 
-// 创建默认实例
-export const aesCrypto = new AESCrypto();
