@@ -178,15 +178,15 @@ function Rsa() {
         <div className="right-panel">
           <h2>📤 输出区域</h2>
 
-          {/* 后端返回的原始内容 */}
+          {/* 后端返回的解密内容 */}
           <div className="section">
-            <h3>📦 后端返回的原始内容 (已加密)</h3>
+            <h3>📦 后端返回的解密内容</h3>
             <textarea
               value={backendResponse}
               readOnly
               rows={4}
               className="backend-response-textarea"
-              placeholder="后端返回的加密数据将显示在这里..."
+              placeholder="后端返回的解密数据将显示在这里..."
             />
           </div>
 
@@ -223,7 +223,7 @@ function Rsa() {
           <li>输入明文内容</li>
           <li>前端用RSA公钥加密内容</li>
           <li>发送加密内容给后端</li>
-          <li>后端用RSA私钥解密，然后重新加密返回</li>
+          <li>后端用RSA私钥解密并返回明文</li>
           <li>前端验证解密结果的正确性</li>
         </ol>
         <p><strong>注意：</strong>确保后端服务在 http://localhost:9091 运行</p>
