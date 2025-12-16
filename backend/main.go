@@ -1,11 +1,15 @@
 package main
 
 import (
+	"crypto"
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
 	"encoding/base64"
 	"encoding/json"
+	"encoding/pem"
 	"flag"
 	"fmt"
 	"io"
@@ -134,10 +138,56 @@ type ErrorResponse struct {
 	Error string `json:"error"`
 }
 
+// RSA 密钥对
+var rsaPrivateKey *rsa.PrivateKey
+var rsaPublicKey string
+
+// RSA解密函数
+func rsaDecrypt(encryptedData string) (string, error) {
+	// 解码Base64密文
+	encryptedBytes, err := base64.StdEncoding.DecodeString(encryptedData)
+	if err != nil {
+		return "", fmt.Errorf("base64 decode failed: %v", err)
+	}
+
+	// 使用RSA私钥解密
+	decryptedBytes, err := rsaPrivateKey.Decrypt(nil, encryptedBytes, &rsa.OAEPOptions{
+		Hash: crypto.SHA256,
+	})
+	if err != nil {
+		return "", fmt.Errorf("RSA decryption failed: %v", err)
+	}
+
+	// 将解密后的字节数组作为UTF-8字符串返回
+	return string(decryptedBytes), nil
+}
+
 func main() {
 	// 解析命令行参数
 	var port = flag.String("port", "8080", "服务器端口")
 	flag.Parse()
+
+	// 生成RSA密钥对
+	fmt.Println("Generating RSA key pair...")
+	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		log.Fatalf("Failed to generate RSA key pair: %v", err)
+	}
+	rsaPrivateKey = privateKey
+
+	// 导出公钥为PEM格式
+	publicKeyBytes, err := x509.MarshalPKIXPublicKey(&privateKey.PublicKey)
+	if err != nil {
+		log.Fatalf("Failed to marshal public key: %v", err)
+	}
+	publicKeyPEM := pem.EncodeToMemory(&pem.Block{
+		Type:  "PUBLIC KEY",
+		Bytes: publicKeyBytes,
+	})
+	rsaPublicKey = string(publicKeyPEM)
+	fmt.Println("RSA key pair generated successfully!")
+	fmt.Printf("RSA Private Key Size: %d bits\n", privateKey.Size()*8)
+	fmt.Printf("RSA Public Key:\n%s\n", rsaPublicKey)
 
 	// 设置CORS中间件
 	corsMiddleware := func(next http.HandlerFunc) http.HandlerFunc {
@@ -154,6 +204,63 @@ func main() {
 			next(w, r)
 		}
 	}
+
+	// 获取RSA公钥接口
+	http.HandleFunc("/api/rsa/public-key", corsMiddleware(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "GET" {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{
+			"publicKey": rsaPublicKey,
+		})
+	}))
+
+	// RSA解密处理接口
+	http.HandleFunc("/api/rsa/process", corsMiddleware(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "POST" {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+
+		var req struct {
+			EncryptedData string `json:"encryptedData"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			log.Printf("JSON decode error: %v", err)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(ErrorResponse{Error: "Invalid JSON"})
+			return
+		}
+
+		if req.EncryptedData == "" {
+			log.Printf("Empty encrypted data provided")
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(ErrorResponse{Error: "Encrypted data is required"})
+			return
+		}
+
+		// 使用RSA解密函数
+		decryptedData, err := rsaDecrypt(req.EncryptedData)
+		if err != nil {
+			log.Printf("RSA decryption failed: %v", err)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(ErrorResponse{Error: fmt.Sprintf("RSA decryption failed: %v", err)})
+			return
+		}
+
+		log.Printf("RSA decryption successful! Original data: '%s'", decryptedData)
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{
+			"decryptedData": decryptedData,
+		})
+	}))
 
 	// 处理接口：接收加密内容和密钥，解密后重新加密返回
 	http.HandleFunc("/api/process", corsMiddleware(func(w http.ResponseWriter, r *http.Request) {
