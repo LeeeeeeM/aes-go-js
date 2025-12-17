@@ -1,41 +1,76 @@
 package shared
 
 import (
-	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
+	"fmt"
+	"os"
+	"sync"
 )
 
-// 生成RSA密钥对（每次调用都重新生成，确保一致性）
-func generateRSAKeyPair() (*rsa.PrivateKey, string, error) {
-	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
-	if err != nil {
-		return nil, "", err
+var (
+	rsaPrivateKey *rsa.PrivateKey
+	rsaPublicKey  string
+	initOnce      sync.Once
+	initError     error
+)
+
+// initRSAKeys 初始化RSA密钥对（从环境变量加载，一次性初始化）
+func initRSAKeys() {
+	// 从环境变量获取私钥
+	privateKeyPEM := os.Getenv("RSA_PRIVATE_KEY")
+	if privateKeyPEM == "" {
+		initError = fmt.Errorf("RSA_PRIVATE_KEY environment variable is not set")
+		return
 	}
 
-	// 导出公钥为PEM格式
-	publicKeyBytes, err := x509.MarshalPKIXPublicKey(&privateKey.PublicKey)
-	if err != nil {
-		return nil, "", err
+	// 从环境变量获取公钥
+	publicKeyPEM := os.Getenv("RSA_PUBLIC_KEY")
+	if publicKeyPEM == "" {
+		initError = fmt.Errorf("RSA_PUBLIC_KEY environment variable is not set")
+		return
 	}
-	publicKeyPEM := pem.EncodeToMemory(&pem.Block{
-		Type:  "PUBLIC KEY",
-		Bytes: publicKeyBytes,
-	})
 
-	return privateKey, string(publicKeyPEM), nil
+	// 解析私钥
+	block, _ := pem.Decode([]byte(privateKeyPEM))
+	if block == nil {
+		initError = fmt.Errorf("failed to decode private key PEM")
+		return
+	}
+
+	privateKey, err := x509.ParsePKCS8PrivateKey(block.Bytes)
+	if err != nil {
+		initError = fmt.Errorf("failed to parse private key: %v", err)
+		return
+	}
+
+	rsaKey, ok := privateKey.(*rsa.PrivateKey)
+	if !ok {
+		initError = fmt.Errorf("private key is not RSA type")
+		return
+	}
+
+	rsaPrivateKey = rsaKey
+	rsaPublicKey = publicKeyPEM
 }
 
-// GetRSAPublicKey 获取RSA公钥（每次调用重新生成）
+// GetRSAPublicKey 获取RSA公钥（使用固定的环境变量密钥）
 func GetRSAPublicKey() (string, error) {
-	_, publicKey, err := generateRSAKeyPair()
-	return publicKey, err
+	initOnce.Do(initRSAKeys)
+	if initError != nil {
+		return "", initError
+	}
+	return rsaPublicKey, nil
 }
 
-// GetRSAKeyPair 获取完整的RSA密钥对（每次调用重新生成）
+// GetRSAKeyPair 获取完整的RSA密钥对（使用固定的环境变量密钥）
 func GetRSAKeyPair() (*rsa.PrivateKey, string, error) {
-	return generateRSAKeyPair()
+	initOnce.Do(initRSAKeys)
+	if initError != nil {
+		return nil, "", initError
+	}
+	return rsaPrivateKey, rsaPublicKey, nil
 }
 
 // ErrorResponse 错误响应结构体
