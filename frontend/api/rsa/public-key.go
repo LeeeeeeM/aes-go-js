@@ -24,7 +24,13 @@ func RSAPublicKeyHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	publicKey, err := shared.GetRSAPublicKey()
+	if err != nil {
+		http.Error(w, "Failed to generate RSA key", http.StatusInternalServerError)
+		return
+	}
+
 	json.NewEncoder(w).Encode(map[string]string{
-		"publicKey": shared.GetRSAPublicKey(),
+		"publicKey": publicKey,
 	})
 }

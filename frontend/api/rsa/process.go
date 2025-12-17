@@ -69,8 +69,17 @@ func RSAProcessHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 使用RSA解密函数
-	decryptedData, err := RSADecrypt(shared.GetRSAPrivateKey(), req.EncryptedData)
+	// 生成RSA密钥对并解密（确保使用相同的密钥对）
+	privateKey, _, err := shared.GetRSAKeyPair()
+	if err != nil {
+		log.Printf("RSA key generation failed: %v", err)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(shared.ErrorResponse{Error: "RSA key generation failed"})
+		return
+	}
+
+	decryptedData, err := RSADecrypt(privateKey, req.EncryptedData)
 	if err != nil {
 		log.Printf("RSA decryption failed: %v", err)
 		w.Header().Set("Content-Type", "application/json")
